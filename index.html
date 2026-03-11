@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCA Funder Matcher</title>
+<style>
+body{font-family:Arial;background:#0f172a;color:white;margin:0;padding:40px}
+h1{margin-bottom:10px}
+.container{max-width:1100px;margin:auto;display:grid;grid-template-columns:400px 1fr;gap:30px}
+.card{background:#1e293b;padding:25px;border-radius:10px}
+label{font-size:14px;display:block;margin-top:15px}
+input,select{width:100%;padding:10px;margin-top:5px;border-radius:6px;border:none}
+button{margin-top:20px;width:100%;padding:12px;border:none;border-radius:6px;background:#3b82f6;color:white;font-weight:bold;cursor:pointer}
+button:hover{background:#2563eb}
+.resultCard{background:#0f172a;padding:15px;border-radius:8px;margin-bottom:12px;border:1px solid #334155}
+.good{border-left:5px solid #22c55e}
+.bad{border-left:5px solid #ef4444}
+.small{color:#94a3b8;font-size:13px}
+</style>
+</head>
+<body>
+<h1>MCA Funder Routing Tool</h1>
+<p class="small">Enter merchant info to see which funders match.</p>
+<div class="container">
+<div class="card">
+<h3>Merchant Info</h3>
+<label>Monthly Revenue</label>
+<input id="revenue" type="number">
+<label>Amount Requested</label>
+<input id="amount" type="number">
+<label>Industry</label>
+<select id="industry">
+<option>Retail</option>
+<option>Restaurant</option>
+<option>Construction</option>
+<option>Trucking</option>
+<option>Auto Sales</option>
+<option>Medical</option>
+<option>Professional Services</option>
+<option>Beauty</option>
+<option>Wholesale</option>
+<option>Ecommerce</option>
+<option>Financial Services</option>
+<option>Other</option>
+</select>
+<label>Time In Business (months)</label>
+<input id="tib" type="number">
+<label>Credit Score</label>
+<input id="fico" type="number">
+<label>State</label>
+<input id="state" placeholder="Example: NY">
+<label>Existing Positions</label>
+<input id="positions" type="number">
+<button onclick="runMatch()">Find Funders</button>
+</div>
+<div class="card">
+<h3>Results</h3>
+<div id="results"></div>
+</div>
+</div>
+<script>
+const funders=[
+{name:"Aspire Funding Platform",minRevenue:10000,minTIB:12,minFico:0,maxPositions:5,maxDeal:500000,badIndustries:["Gambling","Casino","CBD","Cannabis","Vape"],badStates:[]},
+{name:"Everest Business Funding",minRevenue:3000,minTIB:4,minFico:550,maxPositions:4,maxDeal:500000,badIndustries:["Auto Sales","Attorneys"],badStates:[]},
+{name:"Fratello Capital",minRevenue:20000,minTIB:6,minFico:0,maxPositions:6,maxDeal:60000,badIndustries:["Trucking"],badStates:[]},
+{name:"Fox Funding",minRevenue:50000,minTIB:12,minFico:500,maxPositions:5,maxDeal:1500000,badIndustries:["Nonprofit"],badStates:[]},
+{name:"LiquidBee",minRevenue:25000,minTIB:9,minFico:0,maxPositions:4,maxDeal:500000,badIndustries:[],badStates:[]},
+{name:"SuperFast Capital",minRevenue:50000,minTIB:12,minFico:550,maxPositions:4,maxDeal:2000000,badIndustries:["Trucking","Lawyers"],badStates:[]},
+{name:"Torro Funding",minRevenue:20000,minTIB:6,minFico:500,maxPositions:10,maxDeal:100000,badIndustries:["Trucking","Auto Sales"],badStates:["NY"]}
+];
+function runMatch(){
+const revenue=parseFloat(document.getElementById("revenue").value);
+const amount=parseFloat(document.getElementById("amount").value);
+const tib=parseFloat(document.getElementById("tib").value);
+const fico=parseFloat(document.getElementById("fico").value);
+const state=document.getElementById("state").value.toUpperCase();
+const positions=parseFloat(document.getElementById("positions").value);
+const industry=document.getElementById("industry").value;
+let results="";
+funders.forEach(f=>{
+let eligible=true;
+let reason="";
+if(revenue<f.minRevenue){eligible=false;reason="Revenue too low"}
+if(tib<f.minTIB){eligible=false;reason="Time in business too low"}
+if(fico<f.minFico){eligible=false;reason="Credit score too low"}
+if(positions>f.maxPositions){eligible=false;reason="Too many positions"}
+if(amount>f.maxDeal){eligible=false;reason="Deal size too large"}
+if(f.badStates.includes(state)){eligible=false;reason="State restricted"}
+if(f.badIndustries.includes(industry)){eligible=false;reason="Industry restricted"}
+if(eligible){
+results+=`<div class='resultCard good'><b>${f.name}</b><div class='small'>Eligible funder</div></div>`
+}else{
+results+=`<div class='resultCard bad'><b>${f.name}</b><div class='small'>Not Eligible — ${reason}</div></div>`
+}
+});
+document.getElementById("results").innerHTML=results;
+}
+</script>
+</body>
+</html>
